@@ -51,7 +51,7 @@ spec:
     stage('Build and push image with Container Builder') {
       steps {
         container('gcloud') {
-          sh "PYTHONUNBUFFERED=1 gcloud builds ${imageTag} ."
+          sh "PYTHONUNBUFFERED=1 gcloud builds submit -t ${imageTag} ."
         }
       }
     }
@@ -65,7 +65,7 @@ spec:
           sh("kubectl --namespace=production apply -f k8s/services/")
           sh("kubectl --namespace=production apply -f k8s/canary/")
           sh("echo http://`kubectl --namespace=production get service/${feSvcName} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'` > ${feSvcName}")
-        } 
+        }
       }
     }
     stage('Deploy Production') {
@@ -83,10 +83,10 @@ spec:
     }
     stage('Deploy Dev') {
       // Developer Branches
-      when { 
-        not { branch 'master' } 
+      when {
+        not { branch 'master' }
         not { branch 'canary' }
-      } 
+      }
       steps {
         container('kubectl') {
           // Create namespace if it doesn't exist
@@ -99,7 +99,7 @@ spec:
           echo 'To access your environment run `kubectl proxy`'
           echo "Then access your service via http://localhost:8001/api/v1/proxy/namespaces/${env.BRANCH_NAME}/services/${feSvcName}:80/"
         }
-      }     
+      }
     }
   }
 }
